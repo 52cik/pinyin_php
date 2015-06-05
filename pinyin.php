@@ -2,7 +2,8 @@
 /**
  * PHP 汉字转拼音 [包含20902个基本汉字+5059生僻字]
  * @author 楼教主(cik520@qq.com)
- * @version v1
+ * @version v1.1
+ * @note 请开启 mb_string 扩展
  */
 /* 测试用例
 $start_time = microtime(1);
@@ -62,21 +63,21 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
     }
 
     $str = trim($str);
-    $len = strlen($str);
+    $len = mb_strlen($str, 'UTF-8');
     if ($len < 3) return $str;
 
     $rs = '';
     for ($i = 0; $i < $len; $i++) {
-        $asc = ord($str[$i]);
+        $chr = mb_substr($str, $i, 1, 'UTF-8');
+        $asc = ord($chr);
         if ($asc < 0x80) { // 0-127
             // if(($asc >= 48 && $asc <= 57) || ($asc >= 97 && $asc <= 122) || ($asc >= 65 && $asc <= 90) || $asc === 32) {
-            if (preg_match($allow_chars, $str[$i])) { // 用参数控制正则
-                $rs .= $str[$i]; // 0-9 a-z A-Z 空格
+            if (preg_match($allow_chars, $chr)) { // 用参数控制正则
+                $rs .= $chr; // 0-9 a-z A-Z 空格
             } else { // 其他字符用填充符代替
                 $rs .= $placeholder;
             }
         } else { // 128-255
-            $chr = $str[$i] . $str[++$i] . $str[++$i];
             if (isset($pinyins[$chr])) {
                 $rs .= 'first' === $ret_format ? $pinyins[$chr][0] : $pinyins[$chr];
             } else {
